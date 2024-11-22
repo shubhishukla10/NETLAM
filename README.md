@@ -9,9 +9,6 @@ This repository contains all the files related to the submission titled "NETLAM:
 - [Overview](#overview)
 - [Repository Structure](#repository-structure)
 - [Prerequisites](#prerequisites)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
