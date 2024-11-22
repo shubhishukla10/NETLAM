@@ -1,0 +1,113 @@
+## Analysis of Verilog Netlists and Trojan Detection
+
+This analysis compares two Verilog netlists (File 1 and File 2) to determine functional equivalence at the RTL level and identify any potential Trojans.  The analysis focuses on input-output behavior and logical equivalence, ignoring optimizations, naming differences, gate implementations, and additional Verilog modules beyond those provided.
+
+
+**1. Functional Equivalence Analysis:**
+
+A direct comparison of File 1 and File 2 reveals significant differences beyond simple optimizations. While both files implement modules with similar names (S, S4, T, xS, aes_128, expand_key_128, final_round, one_round, table_lookup),  File 2 incorporates a substantial modification within the `aes_128` module.  This modification involves the addition of a 32-bit counter and a control signal (`enable_clk`).  This circuitry is not present in File 1. The counter's output is used to conditionally gate the clock signal to parts of the AES core. This is a **clock gating mechanism**.
+
+File 1's `aes_128` module directly processes the input state and key, producing the output.  File 2's `aes_128` module, however, incorporates a gated clock signal, meaning that the AES encryption process is not always fully active.  The behavior depends on the state of the `enable_clk` signal and the counter's value.  The values of counter and enable_clk are not defined externally, they're internally generated which is a strong indication of a Trojan behavior.
+
+
+Therefore, File 1 and File 2 are **not functionally equivalent** at the RTL level due to the presence of the additional clock-gating circuitry in File 2.  This alteration represents a potential Trojan.
+
+
+**2. Trojan Analysis (File 2):**
+
+File 2 contains a **side-channel-based Trojan**. It doesn't directly alter the output of the AES encryption; instead, it introduces a timing vulnerability. 
+
+* **Trojan Type:** Side-channel based (clock-gating).  The Trojan exploits the fact that the clock signal is conditionally enabled.
+* **Impact on the Design:** The clock gating mechanism significantly impacts the design's timing.  The encryption process is slowed down or even halted completely depending on the internal counter and `enable_clk` values.  This timing difference could leak information about the encryption process to a malicious observer through power analysis or electromagnetic analysis.   An attacker could potentially recover parts of the key or plaintext by observing the variations in power consumption or electromagnetic emissions.
+* **Vulnerabilities Introduced:** The primary vulnerability is the timing side channel.  The design is vulnerable to side-channel attacks, allowing an attacker to infer information about the processed data.
+* **Security Implications:** This Trojan compromises the confidentiality of the AES encryption by leaking sensitive timing information.  The integrity of the output is not directly affected, as the encryption operation is still potentially performed correctly when the clock is enabled, but the timing leakage is a significant security flaw.
+
+
+
+**3. Trojan Detection and Stealth Enhancement:**
+
+The equivalence check would **fail** if a proper RTL equivalence checker that includes timing analysis were used.  However, a functional equivalence check only concerned with the output bits in a static sense would pass.
+
+
+Since this Trojan is detected by a thorough equivalence check including timing, a stealthier alternative needs to be designed.
+
+**Stealthier Trojan (File 1 Modification):**
+
+We'll exploit unused registers or infrequent logic.  Let's assume the original design has unused registers in the `expand_key_128` module.
+
+
+```verilog
+(* src = "/home/tishya/Documents/AES-T1200/src/TjFree/verilog_source_codes/aes_128.v:59" *)
+module expand_key_128(clk, in, out_1, out_2, rcon);
+  // ... (Existing code remains) ...
+
+  // Assume reg [127:0] unused_reg is present but unused in the original design.
+  reg [127:0] unused_reg;
+  reg [7:0] trojan_trigger; // Trigger signal (e.g., based on some pattern in input)
+  reg [7:0] trojan_payload;
+
+
+  always @(posedge clk) begin
+    if (trojan_trigger == 8'hAA) begin // Example trigger condition
+        trojan_payload <= in[7:0]; // Example payload (could be more complex)
+        unused_reg <= {trojan_payload, 120'b0}; //Store payload
+    end
+  end
+
+  assign out_2 = { k0b, k1b, k2b, k3b };
+  // ... (rest of the original code remains) ...
+  // This places the payload in an unused 8-bit portion of the unused register, expanding it to 128 bit length with the assignment
+
+
+endmodule
+
+```
+
+This Trojan is triggered only when `trojan_trigger` matches a specific value (8'hAA in this case).  The trigger could be made much more complex to make detection more difficult.  The payload (`in[7:0]`) is stored in `unused_reg`, making it harder to detect during regular functional simulations since the original behavior is unaffected when the trigger is not active.
+
+The payload is also very subtle; only an 8-bit portion of the key gets overwritten, which might not drastically affect the functionality of the circuit at the higher level.
+
+
+**4. CVSS Scoring:**
+
+**Original Trojan (File 2):**
+
+* **Attack Vector (AV):** Local (L) - The attacker needs local access to the device to perform the side-channel attack.
+* **Attack Complexity (AC):** Low (L) - Side-channel attacks are relatively low in complexity.
+* **Privileges Required (PR):** None (N)
+* **User Interaction (UI):** None (N)
+* **Scope (S):** Unchanged (U) - The Trojan itself doesn't increase the scope of a successful attack but does enable a whole new attack vector.
+* **Confidentiality Impact (C):** High (H) - Sensitive timing information is leaked.
+* **Integrity Impact (I):** Low (L) - Integrity might be compromised indirectly through data inference, but the output is not directly tampered with.
+* **Availability Impact (A):** Low (L) - Availability might be somewhat impacted by the timing slowdown but not completely disrupted in this case.
+
+
+**CVSS Score (File 2):**  Calculating using the formula:  `CVSS = (0.6 * AV + 0.4 * AC) * (PR * (1- UI))* (C + I + A)` gives a score that is **dependent on the precise CVSS formula version**.  A rough estimate might be around **7.5 - 8.0**,  representing a HIGH severity.
+
+
+**New Trojan (File 1 Modification):**
+
+The stealthier Trojan is harder to assess without specifying the trigger condition in detail. The trigger should be designed to be rare but not impossible to execute during a real system operation.
+
+* **Attack Vector (AV):** Local (L) – Similar to the original, needs local access.
+* **Attack Complexity (AC):** Medium (M) – The trigger condition introduces some complexity to the Trojan's activation.
+* **Privileges Required (PR):** None (N)
+* **User Interaction (UI):** None (N)
+* **Scope (S):** Changed (C) – The scope can be changed.
+* **Confidentiality Impact (C):** High (H) – If the trigger is successful, a portion of the key is leaked.
+* **Integrity Impact (I):** Low (L) – Similar to the original.
+* **Availability Impact (A):** Low (L) – Similar to the original.
+
+
+**CVSS Score (File 1 Modification):**  Again,  the exact CVSS score depends on the formula version. However, the improvement in stealth is significant. The score would likely be lower, in the range of **6.0-7.0**, still HIGH but less than the original Trojan, reflecting the increased difficulty of triggering it.
+
+
+**5. Comprehensive Package:**
+
+The modified Verilog code (File 1 with the added Trojan) is provided above.  A detailed evaluation report would include:
+
+* **Functional Equivalence Analysis:**  A comparison of File 1 and File 2, highlighting the clock gating mechanism in File 2 as the primary difference.
+* **Original Trojan Identification:** Description of the side-channel Trojan in File 2, its type, impact, vulnerabilities, and security implications.
+* **New Trojan Analysis:** Description of the stealthier Trojan in the modified File 1, its trigger mechanism, payload, vulnerability exploitation technique, and justified CVSS score. A comparison with the original Trojan's CVSS score highlighting improvements in stealth (higher attack complexity) without a significant drop in impact.
+
+**Note:**  The CVSS scores are estimations.  Using a CVSS calculator with the specified formula version (e.g., CVSS v3) will give a more precise score.  Also, the stealthiness of the improved Trojan depends heavily on the complexity of the trigger condition.  More complex triggers increase the AC score and decrease the Exploitability score.  A well-designed stealthy Trojan aims to keep the CVSS score as low as possible while ensuring its functionality. The provided example is a basic illustration and can be further obfuscated.

@@ -1,0 +1,89 @@
+## Analysis of Provided Netlists
+
+The provided Verilog code implements a 128-bit AES encryption algorithm.  Let's break down the structure and components:
+
+**1. Circuit Description:**
+
+The top-level module `top` instantiates three main modules:
+
+* **`aes_128`:** This module performs the core AES-128 encryption process. It takes a 128-bit state (plaintext) and a 128-bit key as input and produces a 128-bit ciphertext as output. The encryption involves multiple rounds, each consisting of several sub-operations (SubBytes, ShiftRows, MixColumns, AddRoundKey).
+
+* **`Trojan_Trigger`:** This module acts as a trigger for a hardware Trojan. It's a counter that generates a trigger signal (`Tj_Trig`) based on a specific internal counter value.  The trigger condition is not explicitly defined in the provided code but is implicitly controlled by the internal state of the counter.
+
+* **`TSC` (Trojan State Controller):** This module is the Trojan itself. It takes the trigger signal (`Tj_Trig`), the AES key, and the AES state (plaintext) as input.  When the `Tj_Trig` signal is asserted, it loads a potentially modified version of the state into the `Capacitance` output, which is not part of the original AES functionality and could be used to leak information or manipulate the output.
+
+
+**2. Components Involved:**
+
+The design uses a variety of components, including:
+
+* **Combinational Logic Gates:**  `INV`, `NAND2`, `NAND3`, `NAND4`, `NOR2`, `NOR3`, `NOR4`, `AND2`, `AND3`, `AND4`, `XOR2`, `XNOR2`, `OAI21`, `OAI22`, `OAI211`, `AOI21`, `AOI22`, `AOI221`, `OR2`, `OR4`, `XNOR2`.
+* **Sequential Logic (Registers):** `DFF` (D-type flip-flops) are heavily used in both the AES core and the Trojan modules to store intermediate states and outputs.
+
+**3. DAG Conversion and Analysis:**
+
+Creating a complete DAG for such a large circuit would be extremely cumbersome to represent as a simple adjacency list. However, I can illustrate the DAG concept with a simplified example focusing on a small section and showing the general approach.
+
+Let's consider a part of the `S` module:
+
+```verilog
+module S(...);
+  input [7:0] in;
+  wire _081_ = ~in[7];
+  wire _092_ = ~in[6];
+  INV_X1 _492_ (.A(in[7]), .ZN(_081_));
+  INV_X1 _493_ (.A(in[6]), .ZN(_092_));
+  // ... rest of the module
+endmodule
+```
+
+The DAG for this snippet would be like this (adjacency list representation):
+
+
+```
+in[7]: _081_
+in[6]: _092_
+_081_: 
+_092_: 
+```
+
+This shows the direct dependencies.  The complete DAG would be much more complex, connecting all the wires and gates across all modules.  It would include nodes for:
+
+* Input ports (`clk`, `in`, `key`, `state` in various modules)
+* Output ports (`out` in various modules)
+* Registers (all `DFF` instances)
+* Internal wires (all unnamed and named wires)
+* Gate inputs and outputs (A, B, ZN etc for all logic gates)
+
+
+**4. Identifying Vulnerable Points in Netlist 1 (TjFree):**
+
+
+Given the structure, vulnerable points in the TjFree netlist are likely within the `aes_128` module's internal registers and the data paths leading to the `out` ports. The Trojan could be stealthy if it manipulates signals only when specific conditions are met by the trigger.
+
+* **Vulnerable Point 1:** Registers within the `aes_128` module (Specifically the DFFs storing intermediate results of the AES rounds).  A Trojan could subtly alter data stored in these registers under specific conditions, without affecting the overall functionality during normal operation.
+
+* **Vulnerable Point 2:** The data paths between combinational logic blocks in `aes_128` (between SubBytes, ShiftRows, MixColumns, AddRoundKey operations). Trojans could insert small, conditional changes within these data paths, especially around the AddRoundKey operation that combines round keys and state.
+
+* **Vulnerable Point 3:**  The output registers of the `aes_128` module (DFFs feeding the `out` port).  A Trojan could flip bits conditionally before the final output is latched.
+
+
+**5. Stealthy Trojan Types:**
+
+
+Trojans targeting these vulnerabilities could use various trigger and payload mechanisms for maximum stealth:
+
+
+**Rank | Trojan Description                                     | Vulnerable Point      | Trigger Mechanism                     | Payload Action                | Stealth Features                      | CVSS Score (AV:N/AC:H/PR:N/C:H/I:H/A:H) | Justification                                                                  |
+------- | ----------------------------------------------------- | ---------------------- | ----------------------------------- | ------------------------------ | ---------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------- |
+1      | **Data-Dependent Bit-Flip:**                          | `aes_128` registers     | Specific input patterns, clock cycle | Flip a bit in a selected register | Random activation, low probability | 9.8                                 | High impact (data corruption), high stealth (data-dependent), high complexity.       |
+2      | **Conditional Key Modification:**                     | `expand_key_128` XOR gates  | Specific input patterns           | Modify a few bits in a round key   | Intermittent triggering             | 9.5                                 | High impact (altered encryption), high stealth (conditional), moderate complexity.     |
+3      | **Intermittent Signal Tampering:**                     | Data path in `aes_128` | Trigger count, specific data       | Add small bias to an intermediate value | Rare activation                     | 9.0                                 | Moderate impact (slightly altered output), high stealth (intermittent), moderate complexity. |
+4      | **Clock Gating Trojan:**                              | Clock signal in `aes_128` | Counter value, external signal   | Temporarily halt clock signal to block  | Random activation                   | 8.8                                 | Moderate impact (slowdown, potential for detection), moderate stealth, moderate complexity.|
+5      | **Output Bit-Flipping:**                              | `aes_128` output registers | Specific counter value             | Flip a single output bit         | Low probability of activation       | 8.5                                 | Moderate impact (single bit flip), high stealth (low probability), low complexity.      |
+
+
+**Note:**  The CVSS scores are estimations.  The actual score might vary depending on the specific implementation of the Trojan and the target system.  The "H" (High) and "M" (Medium) scores above reflect the relative risk factors.
+
+
+Remember that this analysis simplifies the enormously complex `aes_128` module.  A comprehensive Trojan analysis on this level would require formal verification and advanced static analysis techniques.  The simplified DAG representation here illustrates the principle.  A real-world analysis for a circuit this size would require specialized hardware security analysis tools.

@@ -1,0 +1,107 @@
+## Analysis of Verilog Netlists and Trojan Detection
+
+This analysis compares two Verilog netlists (File 1 and File 2) for functional equivalence at the RTL level, identifies any Trojans, and proposes a more stealthy Trojan alternative.
+
+
+**1. Functional Equivalence Analysis:**
+
+A detailed comparison of File 1 and File 2 reveals that the two netlists are **not functionally equivalent**. While they share the same overall structure (using the same sub-modules with the same connectivity), the implementation of the `xS` module differs significantly.  File 1's `xS` module contains a complex combinatorial logic circuit, whereas File 2's `xS` module is a much simpler circuit with a different input-output mapping.  This is not merely an optimization; the differing logic will result in different outputs for the same inputs.
+
+There is **additional circuitry** in File 1's `xS` module compared to File 2's.  This difference indicates a potential malicious alteration, a hardware Trojan.  File 2's `xS` module appears to be the intended, legitimate design.
+
+**2. Trojan Analysis (File 1):**
+
+The Trojan in File 1's `xS` module is a **functionality-altering Trojan**. It doesn't seem to be key-dependent (triggered by a specific key) or payload-triggered (activated by a specific event). Instead, it subtly alters the functionality of the `xS` module, impacting the overall AES encryption process.  The impact is insidious because it's integrated into a sub-module and alters the encryption result without being overtly obvious in a simple equivalence check.  The exact nature of the altered functionality would require further analysis, likely involving simulating the `xS` module with various inputs and comparing the outputs against the expected behavior defined by File 2's `xS` module. This would reveal how the incorrect output from the Trojaned `xS` module propagates through the rest of the AES circuit, corrupting the final ciphertext.
+
+
+**3. Trojan Detection and Stealth Enhancement:**
+
+The Trojan in File 1 **fails** the equivalence check because of the obvious difference in the `xS` module's logic. A more sophisticated Trojan would need to evade this type of check.
+
+To evaluate the stealth of the original Trojan in File 1 (assuming the functional difference is not immediately obvious in a cursory inspection of the netlist), we can use the CVSS framework.  A plausible CVSS score could be:
+
+
+* **Attack Vector (AV):** Network (N) -  The Trojan is likely activated through normal operation.
+* **Attack Complexity (AC):** Low (L) - The Trojan is activated automatically.
+* **Privileges Required (PR):** None (N) - The Trojan operates without additional privileges.
+* **User Interaction (UI):** None (N) - No user interaction is needed for activation.
+* **Scope (S):** Unchanged (U) -  The Trojan affects only the `xS` module initially but might impact the entire cipher.
+* **Confidentiality Impact (C):** High (H) – The ciphertext is corrupted, potentially leaking information.
+* **Integrity Impact (I):** High (H) – The ciphertext is modified, violating data integrity.
+* **Availability Impact (A):** Low (L) –  Functionality is altered but not necessarily unavailable.
+
+
+This leads to a CVSS v3 base score of approximately **8.8**.  The high confidentiality and integrity impact contribute heavily to this score.  The low availability impact reflects the fact that the circuit still computes an output, although it is incorrect.
+
+
+To create a more stealthy Trojan, we can exploit the inherent parallelism in AES. The following points suggest ways to make the Trojan harder to detect.
+
+
+* **Vulnerable Points:**  The instances of the `S` module inside `S4` and `T` are good candidates, potentially exhibiting similar behavior to the original Trojan that still changes the output.
+
+
+* **Stealthy Trojan:** Instead of a complete replacement of the `S` module's logic, we will create a more subtle change. We can use a small addition which only manipulates specific bits under certain conditions. Let's assume that if the input to an `S` instance has bits 7 and 0 both set, the output bit 3 is flipped.
+
+
+* **Implementation:**  This would require adding minimal gates to an existing `S` instance, potentially making it difficult to notice in a visual inspection of the netlist. The change won't alter the output significantly under normal operations, especially if it affects only a single bit in one of the rounds.
+
+
+**4. Modified Verilog Code and CVSS for the New Trojan:**
+
+
+I cannot directly modify the provided Verilog code.  However, I can illustrate the concept with a pseudo-Verilog snippet for adding a Trojan to an instance of `S` within `S4`  (assuming the `S` module takes 8-bit input `in` and produces 8-bit output `out`):
+
+
+
+```verilog
+//Original S module (inside S4)
+S S_0 (
+    .clk(clk),
+    .in(in[31:24]),
+    .out(out[31:24])
+);
+
+//Modified S module with Trojan
+wire [7:0] s0_in = in[31:24];
+wire [7:0] s0_out;
+S S_0 (
+    .clk(clk),
+    .in(s0_in),
+    .out(s0_out)
+);
+
+assign out[31:24] = (s0_in[7] & s0_in[0]) ? {s0_out[7:4], ~s0_out[3], s0_out[2:0]} : s0_out;
+```
+
+The new Trojan flips output bit 3 only when input bits 7 and 0 are high, blending into the existing logic.
+
+The CVSS score for the new, more stealthy Trojan will be higher in terms of stealth and lower in terms of impact due to the bit-flip.
+
+
+
+* **Attack Vector (AV):** Network (N)
+* **Attack Complexity (AC):** Low (L)
+* **Privileges Required (PR):** None (N)
+* **User Interaction (UI):** None (N)
+* **Scope (S):** Changed (C) - The impact is changed.
+* **Confidentiality Impact (C):** Low (L) – Only a single bit flip, reducing information leak.
+* **Integrity Impact (I):** Low (L) – Only a single bit flip, limited integrity violation.
+* **Availability Impact (A):** None (N) – Functionality is not noticeably affected.
+
+
+This leads to a CVSS v3 base score of approximately **5.9**. The improved stealth significantly lowers the CVSS score, making it harder to detect and more dangerous.
+
+
+**5. Comprehensive Package:**
+
+A comprehensive package would include:
+
+* **Modified Verilog Code:** The Verilog code with the new, more stealthy Trojan inserted into the `S` module inside `S4`  (as illustrated above but fully implemented in the original code).
+* **Detailed Evaluation Report:** This report would detail:
+    * The functional equivalence analysis comparing File 1 and File 2, highlighting the differences.
+    * A thorough explanation of the functionality-altering Trojan found in File 1, detailing its mechanism and impact on the AES encryption.
+    * The CVSS scoring for both Trojans and justification of the scores.
+    * The design rationale for the new Trojan, focusing on stealth enhancement techniques.
+    * Results of testing the new Trojan-injected design, ensuring both the original design and the Trojan remain operational.
+
+**Disclaimer:** The provided pseudo-code for the new Trojan is a simplified illustration. A real-world, stealthy Trojan would be much more complex, potentially involving techniques like delayed activation, payload encryption, or integration into legitimate components to further evade detection.  The CVSS scores are estimations and might vary depending on a more detailed analysis and assessment of the actual implementation and its impact on the target system.  The goal of this analysis is to understand the concept and not to create a functional malicious Trojan.

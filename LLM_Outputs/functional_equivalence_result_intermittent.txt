@@ -1,0 +1,75 @@
+## Analysis of Verilog Netlists and Trojan Detection
+
+This analysis compares two Verilog netlists (File 1 and File 2) to determine functional equivalence and identify any potential Trojans.  The analysis will focus on input-output behavior and logical equivalence at the RTL level, ignoring optimizations, naming differences, gate implementations, and additional Verilog modules beyond those provided.
+
+
+**1. Functional Equivalence Analysis:**
+
+A rigorous comparison of File 1 and File 2 reveals significant differences that go beyond simple optimizations.  While the module structures are largely similar,  File 2's `aes_128` module contains a substantial addition: a 32-bit counter (`trigger_count`) and associated logic that modifies the output based on the counter's value.
+
+* **File 1's `aes_128` module:**  Performs a standard AES-128 encryption operation, directly XORing the key with the input state and passing the result through subsequent rounds.
+
+* **File 2's `aes_128` module:**  Also performs an AES-128 operation, but incorporates a 32-bit counter (`trigger_count`). This counter increments with each clock cycle.  The  crucial difference lies in the conditional assignment within the `aes_128` module (lines starting with `assign { ... } = { ... }`): the output `out` is modified based on the value of `trigger_count`.  Specifically, certain bits of the output are conditionally replaced with other bits, introducing a deviation from the expected AES-128 output. This suggests malicious alteration.
+
+**Therefore, the two netlists are NOT functionally equivalent at the RTL level.**  File 2 contains additional circuitry that alters the intended functionality.
+
+
+**2. Trojan Analysis (File 2):**
+
+File 2 contains a **payload-triggered Trojan**. The Trojan's characteristics are:
+
+* **Trigger:** The 32-bit counter (`trigger_count`) acts as the trigger. The Trojan remains dormant until the counter reaches a specific value (or a range of values implied by the multiple conditional assignments).
+
+* **Payload:**  The payload is the alteration of the AES-128 output.  The specific bits modified and the values they're replaced with suggest a data manipulation attack. The exact nature of the manipulation requires further analysis of the values assigned based on `trigger_count`.  For example, it might:
+
+    * Inject a specific value into the ciphertext, potentially giving an attacker access to the system.
+    * Modify a specific part of the encrypted data to create a backdoor.
+    * Introduce subtle errors affecting the decryption process.
+
+* **Impact:** The Trojan introduces a critical vulnerability.  The attacker can control the moment the Trojan activates (by influencing the `trigger_count` reaching a specific value, which may be possible depending on the design's context). This leads to functional disruption; the output of the AES encryption is no longer cryptographically secure. Security implications are significant as the system's confidentiality is compromised.
+
+
+**3. Trojan Equivalence Check and Stealth:**
+
+The original Trojan in File 2 **fails** the functional equivalence check because it introduces a clear deviation in the output.  Its stealth is low.
+
+To evaluate the stealth and impact of the original Trojan using CVSS, we'll assume a moderate impact on confidentiality (C:M) and a low impact on integrity (I:L) and availability (A:L). Exploitability is high (E:H) as the counter is simple and predictable, possibly allowing an attacker to induce the trigger.  Considering the context of an AES encryption module, we could assign a CVSS base score  in the range of **7.0 - 7.5**. (Specific CVSS vector would depend on chosen metrics within M, L, and H).
+
+
+**4. Creating a More Stealthy Trojan:**
+
+To improve stealth, we'll design a new Trojan that leverages the following techniques:
+
+* **Integration into legitimate components:** The Trojan will use existing logic within the `S` module (File 1), specifically the unused output bits in `T` module. This utilizes the existing internal module structure.
+
+
+* **Delayed Activation:**  Instead of a simple counter, the trigger will be based on a complex pattern in the input `state` data. This makes it harder to determine when or if the Trojan activates.
+
+
+**5. Modified Verilog Code and Evaluation Report:**
+
+Due to the complexity and length of the existing Verilog code, it's infeasible to provide a fully modified version with a stealthy Trojan embedded here. The following outlines the approach for such modification within the `S` module's `T` module:
+
+
+**Proposed Trojan (Conceptual):**
+
+We'll add a small circuit within the `T` module that detects a specific, infrequent pattern in the input `in` (e.g., a sequence of bits like `8'b10101010`). If the pattern is detected, it uses existing XOR gates within `T` to manipulate the output `out[23:16]` (currently unused) by XORing them with a secret key (hardcoded in the Trojan). These manipulated bits will then pass through the `S4` and `final_round` modules, subtly altering the final output. This Trojan is more difficult to detect during functional equivalence testing as the manipulation is subtle and occurs based on a complex pattern in the input data. The unused bits of the T module ensure this modification remains invisible with standard equivalence checking.
+
+**CVSS of the new Trojan:**
+
+The improved Trojan aims for higher stealth. We'll likely achieve a low confidentiality impact (C:L), as the data manipulation is subtle and might be mistaken for noise unless specifically looked for. The Integrity (I) and Availability (A) impacts remain low (I:L, A:L). Exploitability will drop to low or medium (E:M or E:L), depending on the difficulty of generating the necessary input pattern.  A CVSS base score of  **4.0 - 5.0** is a reasonable estimate for this improved Trojan.  This is a significant reduction compared to the original Trojan, reflecting the improvement in stealth.
+
+
+**Comprehensive Package (Outline):**
+
+A complete package would include:
+
+1. **Modified Verilog Code (File 1):**  The original Verilog code from File 1 with the conceptually described Trojan added to the `T` module.  Note that this code would not be fully functional here, and its generation requires an actual code implementation based on the outlined approach.
+
+2. **Detailed Evaluation Report:**  
+    * **Functional Equivalence Analysis:** A step-by-step comparison of File 1 and File 2, highlighting the differences and explaining why they are not equivalent.  The analysis should specifically address the counter-based trigger of the Trojan in File 2.
+    * **Original Trojan Identification:** A detailed description of the Trojan in File 2 (as already done above). The CVSS base score with justification.
+    * **New Trojan Analysis:** Description of the new Trojan strategy, its trigger condition, the methodology for injection, and expected impact. The CVSS base score for the new Trojan, highlighting the improvements in stealth and effectiveness compared to the original Trojan.
+
+
+This comprehensive package would provide a complete understanding of the Trojan's identification, characteristics, impact, and the improvement made in the stealth of the modified Trojan.  The actual generation of the modified Verilog code would necessitate a coding phase based on the provided methodology.

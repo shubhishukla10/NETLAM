@@ -1,0 +1,106 @@
+## Analysis of Verilog Netlists and Trojan Detection in AES-T1000
+
+This analysis compares two Verilog netlists (File 1 and File 2) for functional equivalence at the RTL level, identifies a Trojan in File 2, and proposes a stealthier alternative.
+
+**1. Functional Equivalence Check:**
+
+File 1 represents a seemingly standard AES-128 encryption module. File 2 includes the same AES-128 core, but adds a Trojan.  A direct comparison of the `aes_128` modules in both files shows identical structure and functionality. The XOR gates performing the initial key addition are the same, as are the structures of the `one_round` and `final_round` modules (ignoring differences in internal wire names which are inconsequential at the RTL level).  However, the top-level module (`top`) and the inclusion of additional modules (`TSC` and `Trojan_Trigger`) in File 2 immediately indicate a difference and the presence of additional circuitry.  This additional circuitry is the Trojan.
+
+
+**2. Trojan Analysis (File 2):**
+
+File 2 contains a hardware Trojan Horse within the `top` module. The Trojan consists of three parts:
+
+* **`Trojan_Trigger` Module:** This module acts as the Trojan's trigger. It monitors specific bits of the input `state` (lines 76, 78, 81, 83, 84, 86, 89, 92, 95, 96, 99, 102, 106, 108, 111, 116, 118, 119, 120, 124, 126, 127) and based on a complex logic condition, it asserts the `Tj_Trig` signal. This is a **payload-triggered Trojan** as the trigger is data dependent. 
+
+* **`lfsr_counter` Module:** This module is a Linear Feedback Shift Register (LFSR) counter.  When `Tj_Trig` is high, the counter increments. This is a simple counter,  not inherently malicious.
+
+* **`TSC` Module:** This module contains the Trojan's payload.  It uses the LFSR's output (`counter`) to XOR with parts of the key. This manipulated data is loaded into the `Capacitance` output. The `TSC` module acts as a side-channel attack by leaking information about the key through this unusual extra output. This leakage is only enabled when the `Trojan_Trigger` asserts the `Tj_Trig`.
+
+**Impact of the Trojan:**
+
+The Trojan introduces several vulnerabilities:
+
+* **Data Leakage:** The `Capacitance` output leaks information about the key, specifically a XOR combination of the key and parts of the internal state. An attacker could potentially recover the key through side-channel analysis by observing the `Capacitance` values.
+
+* **Timing Vulnerability:** The computation within `TSC` might introduce a timing variation or power consumption difference based on the key. This side-channel attack is possible even if the output `Capacitance` is not directly observed and solely by measuring power consumption differences.
+
+* **Functionality Insecurity:** While the main AES-128 encryption remains intact in terms of the correct output, the presence of the Trojan compromises the confidentiality of the key.
+
+**3. Equivalence Check and Trojan Stealth:**
+
+The Trojan *fails* the equivalence check because File 2 has additional modules and outputs (`TSC`, `Trojan_Trigger`, `Capacitance`) not present in File 1. However, if the Trojan were to produce the same output as some other part of the design, it might be overlooked. A more stealthy approach is necessary to evade detection through functional verification.
+
+The original Trojan's CVSS score (assuming it's easily detected):
+
+
+* **Attack Vector:** Network (if the device is networked) or Local (if an attacker has physical access). CVSS:AV -  Local(L) or Network(N)
+* **Attack Complexity:** Low (L) as the trigger is a simple, if complex-looking, logic function.
+* **Privileges Required:** None (N).
+* **User Interaction:** None (N).
+* **Scope:** Changed (C) as it impacts the entire system.
+* **Confidentiality Impact:** High (H) - key material is leaked.
+* **Integrity Impact:** None (N) - the encryption output is not altered.
+* **Availability Impact:** None (N).
+
+CVSS Score (File 2 Trojan):  A CVSS vector of (AV:L/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N) yields a base score of approximately 7.8.
+
+
+**4. Stealthier Trojan Design:**
+
+To create a stealthier alternative, we'll exploit unused registers or infrequent logic in the `expand_key_128` module.  Let's assume there are some unused registers in this module.  The new Trojan will:
+
+1. **Delayed Activation:** The Trojan will only become active after a certain number of clock cycles. This is an integer counter that will compare to a pre-defined number of clock cycles.  It will only activate if the integer counter value is greater or equal to the pre-defined clock cycle value.
+2. **Payload Encryption:** The leaked key data will be XORed with a secret key before being placed in a register.
+3. **Integration into Legitimate Components:** The encrypted payload will be stored in the unused registers of `expand_key_128`.
+
+
+**5. Modified Verilog Code and Evaluation Report:**
+
+
+I cannot directly modify the Verilog code and provide a fully functioning, tested version here because it requires a complete Verilog simulator and the specific details (e.g., the actual number of unused registers and their names in `expand_key_128`) aren't provided in the input.  However, I can illustrate the conceptual changes:
+
+```verilog
+//Modified expand_key_128 module (Illustrative)
+module expand_key_128(clk, in, out_1, out_2, rcon);
+  // ... existing code ...
+
+  reg [7:0] secret_key = 8'hAB; //Example secret key for encryption
+  reg [7:0] encrypted_payload;
+  reg [31:0] unused_reg1; //Assume this register is unused
+  reg [31:0] clock_counter = 0;
+  reg [31:0] activation_threshold = 1000;
+
+  always @(posedge clk) begin
+    if (rst) begin
+        clock_counter <= 0;
+        unused_reg1 <= 0;
+    end else begin
+        clock_counter <= clock_counter + 1;
+        if (clock_counter >= activation_threshold) begin
+             encrypted_payload <= key[7:0] ^ secret_key; //Example payload encryption
+             unused_reg1[7:0] <= encrypted_payload; //Store encrypted payload in unused register
+        end
+    end
+  end
+
+  // ... existing code ...
+endmodule
+```
+
+A new `top` module would then need to be created to read the `unused_reg1` register  from the modified `expand_key_128` module.  This would then require a decryption function for the analysis and observation of the Trojan.
+
+**Evaluation Report:**
+
+The evaluation report would include:
+
+* **Functional Equivalence Analysis:** A statement that the core AES-128 module is functionally equivalent in both netlists. The presence of additional modules in File 2 would highlight the non-equivalence of the `top` modules.
+* **Original Trojan Identification:** A detailed description of the `Trojan_Trigger`, `lfsr_counter`, and `TSC` modules, explaining their behavior and impact as described in section 2.
+* **New Trojan Analysis:**  A description of the new Trojan embedded within `expand_key_128`. It would emphasize the delayed activation, payload encryption, and integration techniques used to enhance stealth.
+* **CVSS Scoring:** The CVSS score for the stealthier Trojan would likely be significantly higher, as the attack vector will change and the detection will be more difficult. The increased stealth improves the Exploitability and reduces the chance of detection during functional testing.  The precise CVSS score for the stealthy Trojan would depend on the specifics of its implementation, such as how difficult it is to identify the inactive period and the strength of the encryption key.
+
+
+
+**Conclusion:**
+
+This analysis demonstrates how hardware Trojans can evade simple equivalence checks.  Advanced techniques like delayed activation and encryption are critical to building more sophisticated Trojans, demanding more robust verification methodologies beyond simple functional equivalence checks to ensure hardware security.  Formal verification methods and side-channel analysis techniques are necessary to detect such sophisticated Trojans.

@@ -1,0 +1,19 @@
+Goal:
+The following are two synthesized gate-level representations of two Verilog designs.
+	You are tasked with the following:
+	
+	1. Provide a detailed analysis of their functional behavior and determine if they are equivalent at the RTL-level, despite having varying top modules or additional sub-modules. Focus on input-output behavior and logical equivalence, ignoring optimizations or naming differences or gate implementations or additional Verilog modules. Is there any additional circuitry or malicious alteration in any of the two files?
+
+	2. If a Trojan is detected in either netlist, analyze its characteristics and impact on the design. Start by identifying the Trojan type, such as key-dependent, payload-triggered, or side-channel-based, through structural and behavioral analysis of the netlist. Next, assess how the Trojan affects the overall design, focusing on vulnerabilities introduced, disruptions caused to timing or functionality, and potential security implications. Provide a thorough explanation of the Trojan’s behavior and its operational consequences.
+
+	3. Based on the equivalence check outcome, determine whether the Trojan passes or fails the check. If the Trojan remains undetected during functional equivalence testing, evaluate its stealth and impact using the Common Vulnerability Scoring System (CVSS). Rank the Trojan and justify its score with detailed observations. If the Trojan is easily detected during equivalence testing, proceed to create a more stealthy alternative. Identify vulnerable points or modules in the design, such as unused registers, infrequent logic, or weak constraints, and propose a new Trojan designed to blend into the original structure using techniques like delayed activation, payload encryption, or integration into legitimate components.
+	
+	4. Modify the original Verilog code by inserting the newly suggested Trojan into the identified vulnerable points. Ensure that the modified code integrates seamlessly into the design without introducing apparent anomalies. Test the new Trojan-injected design for operational correctness while ensuring the Trojan remains functional. After creating the new Trojan, rank it using the CVSS framework, evaluating its stealth, impact, and exploitability. Provide a justified CVSS score and a comparison with the original Trojan to highlight improvements in stealth and effectiveness.
+	
+	5. Finally, deliver a comprehensive package that includes the modified Verilog code with the inserted Trojan, a detailed evaluation report covering the functional equivalence analysis, identification of the original Trojan, and analysis of the newly generated Trojan.
+
+        File 1 Netlist Content:
+        {file1_content}
+
+        File 2 Netlist Content:
+        {file2_content}

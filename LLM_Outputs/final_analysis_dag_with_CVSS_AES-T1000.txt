@@ -1,0 +1,73 @@
+## Analysis of AES-128 Implementations
+
+This analysis examines two synthesized netlists of an AES-128 encryption algorithm, referred to as "TjFree" (File 1) and "TjIn" (File 2).  Both implementations appear to follow a standard AES structure, consisting of several rounds of substitution, permutation, and key addition operations. Key components include:
+
+* **`aes_128` module:** The top-level module, orchestrating the encryption process.
+* **`expand_key_128` module:** Expands the 128-bit key into round keys for each round.
+* **`one_round` module:** Implements a single round of AES.
+* **`final_round` module:** Implements the final round of AES.
+* **`table_lookup` module:** Performs the S-box lookups (substitution).
+* **`S` and `xS` modules:** Implement the byte substitution layer (`S`) and a modified version (`xS`).
+* **`S4` module:** Performs the substitution on 4 bytes simultaneously.
+* **`T` module:**  Handles the permutation or shift rows operation in conjunction with `S4`.
+* **`XOR2_X1`, `NAND2_X1`, `NOR2_X1`, etc.:**  These are basic logic gates.
+* **`DFF_X1`:**  D-type flip-flops for register storage.
+
+**1. DAG Conversion and Analysis:**
+
+Creating a full DAG for these netlists is impractical due to their size.  However, we can illustrate the DAG concept using a simplified example focusing on a portion of the `S` module (File 1):
+
+**Simplified DAG for a portion of module S (TjFree):**
+
+This DAG shows a small section of the `S` module, focusing on a few of the many gates. A full adjacency list would be extremely large.
+
+```
+in[7]: _081_
+in[6]: _092_
+_081_: _501_
+_092_: _501_
+_501_: _178_
+_178_: _200_
+in[4]: _146_
+in[5]: _157_
+_146_: _502_
+_157_: _502_
+_502_: _189_
+_189_: _200_
+_200_: _446_
+
+// ... many more nodes and edges omitted for brevity ... 
+```
+
+**2. Identify Vulnerable Points and Hardware Trojans (TjFree Netlist):**
+
+The complexity and extensive use of combinational logic and many DFFs in the `aes_128` module makes the design challenging to analyze comprehensively for hardware Trojans.  This complexity makes it difficult to perform static analysis to ensure complete Trojan detection.
+
+However, based on general AES vulnerabilities and the structure of the netlist, we can point out some vulnerable points:
+
+* **Registers (`DFF_X1` instances within `aes_128`):** The DFFs storing intermediate AES states (`s0`, `s1`, etc.) are key points.  Altering their outputs could subtly affect the final ciphertext.
+
+* **Data paths within `table_lookup` and `S` Modules:** The critical path involves many cascaded gates implementing S-box logic (within `table_lookup` and `S` modules). This is ripe for a Trojan inserting a small logic modification that's hard to detect via functional equivalence checking (FEC).
+
+* **`expand_key_128` module:**  This module calculates the round keys. A Trojan in this module is especially dangerous as it directly corrupts the keys themselves, affecting all rounds.
+
+
+**Top 4-5 Trojan Candidates (TjFree):**
+
+
+| Trojan Type             | Vulnerable Point                      | Trigger Mechanism                  | Payload Action                 | Stealth Features              | CVSS Score (Severity) | Justification                                                                           |
+|--------------------------|---------------------------------------|--------------------------------------|---------------------------------|-------------------------------|------------------------|---------------------------------------------------------------------------------------|
+| **Bit-flipping**         | `DFF_X1` in `aes_128` (e.g., `s0[0]`) | Specific input byte values, round | Flip a single bit in register   | Random, low probability       | 7.5 (High)              | Subtle impact on output, hard to detect with FEC if infrequent.                       |
+| **Logic modification**  | `table_lookup` module (S-box)          | Always active                     | Modifies lookup table values     | Small, localized modification| 8.0 (High)              |  Could introduce error that's difficult to pinpoint; stealthy if the change is subtle. |
+| **Gate-level addition** | Critical path in `S` module           | Always active                      | Adds a small XOR gate to the path| Change in delay, potentially not detectable in FEC | 7.8 (High)              | A small gate may not impact functionality significantly and is harder to detect via FEC.|
+| **Key modification**    | `expand_key_128` module              | Always active                      | Modifies a few bits in round key| Small, localized modification| 9.0 (Critical)         | Directly alters the key, significantly impacting the encryption – very difficult to detect.|
+| **Delay-based Trojan**   | `aes_128` module critical path       | Always active                     | introduces intentional delay   | Change in delay not visible during functional tests | 6.8 (High)               | May escape detection if timing analysis is not exhaustive; could cause timing failure. |
+
+
+**Note:** CVSS scores are estimates and depend on the specific implementation details and testing methodologies. The impact, exploitability, and stealthiness are interconnected and highly dependent on the chosen vulnerable point and the specific Trojan implementation.
+
+
+The TjIn netlist adds a Trojan trigger (`Trojan_Trigger`) and a Trojan itself (`TSC`). The Trojan trigger is suspicious because it's based on state bits, allowing for the Trojan to be activated upon specific data inputs. The `TSC` Trojan itself is a counter/xor operation and its output is used as a capacitance value. This module is also suspicious because it's using the state and key information, and its purpose is not directly related to AES encryption.  Analyzing the specific logic within the `TSC` module and its interaction with the `Trojan_Trigger` is crucial for a detailed vulnerability assessment.
+
+
+Remember that this analysis relies on a high-level understanding of the AES algorithm and the provided netlists.  A precise and comprehensive analysis requires detailed inspection of the gate-level netlists using specialized hardware Trojan detection tools.

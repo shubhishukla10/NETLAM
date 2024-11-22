@@ -1,0 +1,13 @@
+Goal:
+The following are the Verilog codes of an AES block cipher design.
+        You are tasked with the following:
+
+        1. Identify the `S` module in the provided Verilog files.
+        2. Modify and implement a Gate-Level Trojan only in the `S` module which gets triggered by specific input combinations.
+           - Do not modify any other modules.
+           - Ensure there are no apparent hints of the Trojan inclusion.
+           - Make the Trojan as stealthy as possible.
+        3. Provide the entire modified Verilog code with well-labeled comments where the Trojan is included.
+
+        Verilog Files Content:
+        {combined_files_content}

@@ -1,0 +1,109 @@
+## Analysis of Verilog Netlists and Trojan Detection in AES-T1200
+
+This analysis compares two Verilog netlists (File 1 and File 2) for functional equivalence at the RTL level, identifies a Trojan in File 2, and proposes a more stealthy Trojan alternative.
+
+
+**1. Functional Equivalence Check:**
+
+A direct comparison of File 1 and File 2 reveals significant differences. While both files implement an AES-128 encryption algorithm with similar sub-modules (S, S4, T, expand_key_128, final_round, one_round, table_lookup), File 2 contains an additional module: `TSC` and `Trojan_Trigger`.  File 1's `top` module only includes an AES-128 instance, while File 2's `top` module includes the AES-128 instance, a `Trojan_Trigger` module, and a `TSC` module.
+
+The `TSC` module acts as a Trojan. It takes the key and data as input and, when triggered by `Tj_Trig`, produces an output (`Capacitance`) that is derived from the input data and XORed with portions of the key. This output is not part of the legitimate AES-128 functionality. The Trojan_Trigger module generates the trigger signal `Tj_Trig` based on a large counter, making its activation seemingly random and hard to predict during normal operation.  The counter's logic seems convoluted and designed to make it difficult to analyze at a glance.
+
+Therefore, the two netlists are **not functionally equivalent**. File 2 includes additional circuitry in the form of a Trojan that leaks information.
+
+
+**2. Trojan Analysis:**
+
+The Trojan in File 2 is a **side-channel-based** Trojan.  It doesn't directly alter the AES-128 output, but it leaks information about the input data and key through the `Capacitance` output.  This information leakage happens only when the `Tj_Trig` signal from `Trojan_Trigger` is high; this trigger mechanism is difficult to predict from the netlist. The trigger is based on a large, seemingly random, LFSR-like counter making it a more stealthy approach compared to a simple trigger.
+
+* **Vulnerabilities Introduced:** The Trojan introduces a side-channel vulnerability. An attacker who can observe the `Capacitance` output can potentially recover information about the processed data or key. This is especially true if the attacker knows the key or parts of it and the pattern or frequency of `Tj_Trig` activation.
+
+* **Disruptions Caused:** The Trojan itself does not disrupt the primary AES-128 functionality, at least not overtly. However, the additional circuitry might introduce minor timing variations depending on the implementation, which a dedicated side-channel attack could detect.
+
+* **Security Implications:** The information leakage from the Trojan could compromise the confidentiality of the data being encrypted.  The complexity of the `Trojan_Trigger` module makes it more difficult to detect the Trojan during standard functional verification, requiring more in-depth side-channel analysis.
+
+The LFSR counter in `Trojan_Trigger` is the key element in its stealth.  It is designed to mask the Trojan activation by making the `Tj_Trig` signal activate seemingly randomly.
+
+
+**3. Trojan Detection and Stealth Evaluation:**
+
+The Trojan **fails** the simple functional equivalence check because of the added modules and outputs. However,  detecting it requires a more sophisticated side-channel analysis method rather than a simple input-output comparison.
+
+To evaluate the stealth of the original Trojan, we can use the CVSS framework. A possible CVSSv3 score for the original Trojan could be:
+
+* **Attack Vector (AV):** Local (L) – Assuming the attacker has physical access to the device.
+* **Attack Complexity (AC):** High (H) - Requires specific side-channel analysis techniques.
+* **Privileges Required (PR):** None (N) - No specific privileges are needed beyond physical access.
+* **User Interaction (UI):** None (N) - The Trojan activates autonomously.
+* **Scope (S):** Unchanged (U) - The Trojan doesn't affect other system parts.
+* **Confidentiality Impact (C):** High (H) – Potential data and key leakage.
+* **Integrity Impact (I):** None (N) - No data modification.
+* **Availability Impact (A):** None (N) - No denial of service.
+
+This yields a CVSSv3 base score of approximately **7.5 (High)**. This reflects the high confidentiality impact, but the high attack complexity slightly reduces the score.
+
+
+
+**4. Stealthy Trojan Alternative:**
+
+A more stealthy Trojan could be integrated within the existing AES-128 module, specifically within the `expand_key_128` module.  This module has many unused intermediate wires and registers, which present perfect camouflage.
+
+
+**Modified Verilog (Illustrative):**
+
+This example adds a simple XOR operation to modify a single bit in the key expansion. Note: Actual implementation would involve a more sophisticated method.
+
+```verilog
+(* src = "/home/tishya/Documents/AES-T1200/src/TjIn/verilog_source_codes/aes_128.v:59" *)
+module expand_key_128(clk, in, out_1, out_2, rcon);
+  // ... existing code ...
+
+  // Trojan: XOR with a bit of the input data, conditionally
+  always @(posedge clk) begin
+    if (Counter[0] & Counter[1]) begin // Conditional activation, even more subtle
+      k0a[0] <= k0a[0] ^ in[0]; //Modifying the first bit of k0a
+    end
+  end
+
+  // ... existing code ...
+endmodule
+
+//Trojan_Trigger should be modified as well to use the key expansion instead of the state
+
+
+module Trojan_Trigger(clk, rst, out, Tj_Trig);
+    //The counter can now use outputs of the key expansion instead of the state
+    // ... modified counter logic ...
+    always @(posedge clk) begin
+       if (rst) begin
+          Counter <= 0;
+        end else begin
+           Counter <= Counter +1;
+        end
+     end
+
+    assign Tj_Trig = Counter[0] & Counter[1]; // A simple, but subtle trigger
+endmodule
+```
+
+
+**5. CVSS Score of the Stealthy Trojan:**
+
+The stealthy Trojan is harder to detect as it is integrated within the key expansion. Assuming this new Trojan works as intended, its CVSSv3 base score would likely be higher:
+
+
+* **AV:** Local (L)
+* **AC:** High (H) –  Still requires side-channel analysis, but tracing back to the Trojan will be more difficult given its location.
+* **PR:** None (N)
+* **UI:** None (N)
+* **S:** Unchanged (U)
+* **C:** High (H) - Data leakage through modified key.
+* **I:** Low (L) - The impact of modifying a single bit is low. It may cause the encryption to fail or produce a slightly incorrect ciphertext.
+* **A:** Low (L) - Potential for slightly reduced performance.
+
+This gives a CVSSv3 base score of approximately **8.1 (High)**. This increased score reflects the improved stealth making the attack less complex for the attacker.
+
+
+**Comprehensive Package:**
+
+This response doesn't contain actual modified Verilog code that can be compiled and run. The provided snippets are illustrative examples. The creation of a truly stealthy and effective Trojan would require a deeper understanding of the AES-128 implementation and careful consideration of various side-channel attack detection methods.  A comprehensive package would contain the modified Verilog code, a detailed report on the functional equivalence analysis (including simulation results), the analysis of the original and the new Trojans, and the justified CVSS scores for both.  This report would also include details about the vulnerabilities explored, design weaknesses utilized for Trojan insertion, and a discussion of the limitations of the proposed approach.
