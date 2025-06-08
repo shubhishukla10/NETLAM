@@ -98,7 +98,7 @@ This folder contains all the Python scripts for interacting with the LLMs.
   Python API for creation of DAG and identifying vulnerabilities. 
 - **`api_equivalence.py`**
   Python API for checking functional equivalence.
-- **`trojan_insert_api.py**
+- **`trojan_insert_api.py`**
   Python API for inserting Trojans.
 
 ### **Documentation**
