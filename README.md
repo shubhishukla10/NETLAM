@@ -16,12 +16,27 @@ This repository contains all the files related to the submission titled "NETLAM:
 
 This project demonstrates the automated LLM framework flow, along with methodologies to introduce and detect stealthy hardware Trojans, which are not included in Trust-Hub. The repository includes:
 - Gate-level netlists of AES-128 and its submodules. The Verilog codes are sourced from Trust-Hub.
-- Python API scripts for Creating DAGs from the netlists, identifying vulnerable points, inserting stealthy Trojans in the vulnerable points, and checking for functional equivalences.
+- Python API scripts for Creating DAGs from the netlists, identifying vulnerable points, inserting stealthy Trojans in the vulnerable points, and checking for functional and semantic equivalences.
 - Documentation and examples for all the three functionalities of the framework.
 
 ---
 
 ## Repository Structure
+
+### **Equivalence Check of NETLAM suggested Trojans** ###
+This folder contains the functional equivalence results between the gate-level netlists of the golden design (AES-T1200) and the NETLAM suggested Trojans, performed using the EQY equivalence checker of Yosys.
+- **`eqy_mapped_netlist_clock_gate_T1200.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the clock-gate Trojan-infected AES-T1200 netlist.
+- **`eqy_mapped_netlist_data_tampering_T1200.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the data tampering Trojan-infected AES-T1200 netlist.
+- **`eqy_mapped_netlist_gate_level_T1200.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the gate-level Trojan-infected AES-T1200 netlist.
+- **`eqy_mapped_netlist_intermittent_T1200.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the intermittent Trojan-infected AES-T1200 netlist.
+- **`eqy_mapped_netlist_logic_level_T1200.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the logic-level Trojan-infected AES-T1200 netlist.
+
+---
 
 ### **Gate-Level Netlists**
 This folder contains the gate-level netlists of the AES-T1000, AES-T1200 Trojan-Free and Trojan-Infected versions. The netlists are generated using Yosys:
@@ -51,7 +66,7 @@ This folder contains the pre-defined instructions to the three LLMs.
 - **`dag_inst.txt`**  
   Pre-defined instruction for the LLM to create DAGs and detect vulnerable points in the design.
 - **`equivalence.txt`**
-  Pre-defined instruction for the LLM to check for functional equivalence between the golden reference and Trojan-infected netlists.
+  Pre-defined instruction for the LLM to check for functional and semantic equivalence between the golden reference and Trojan-infected netlists.
 - **`Trojan_insert.txt`**
   Pre-defined instruction for the LLM to modify and insert stealthy Trojan in specified module.
 
@@ -101,6 +116,38 @@ This folder contains all the Python scripts for interacting with the LLMs.
 - **`trojan_insert_api.py`**
   Python API for inserting Trojans.
 
+---
+
+### **Trust Hub Equivalence Check Results**
+This folder contains the functional equivalence results between the gate-level netlists of the golden design (AES-T1200) and the Trust-Hub provided Trojans, performed using the EQY equivalence checker of Yosys.
+- **`eqy_AES-T100_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T100 netlist and the Trojan-infected AES-T100 netlist.
+- **`eqy_AES-T200_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T200 netlist and the Trojan-infected AES-T200 netlist.
+- **`eqy_AES-T300_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T300 netlist and the Trojan-infected AES-T300 netlist.
+- **`eqy_AES-T700_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T700 netlist and the Trojan-infected AES-T700 netlist.
+- **`eqy_AES-T900_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T900 netlist and the Trojan-infected AES-T900 netlist.
+- **`eqy_AES-T1000_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T1000 netlist and the Trojan-infected AES-T1000 netlist.
+- **`eqy_AES-T1100_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T1100 netlist and the Trojan-infected AES-T1100 netlist.
+- **`eqy_AES-T1200_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T1200 netlist and the Trojan-infected AES-T1200 netlist.
+- **`eqy_AES-T1300_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T1300 netlist and the Trojan-infected AES-T1300 netlist.
+- **`eqy_AES-T1500_mapped_netlist_in.txt`**
+  Equivalence results of the Trojan-free AES-T1500 netlist and the Trojan-infected AES-T1500 netlist.
+
+---
+
+### **yosys_eqy Scripts**
+This folder contains the yosys script for performing the equivalence of the Trojan-free and Trojan-infected gate-level netlists.
+
+---
+
 ### **Documentation**
 - **`README.md`**  
   This file, describing the repository's purpose, structure, and usage.
@@ -110,8 +157,10 @@ This folder contains all the Python scripts for interacting with the LLMs.
 ## Prerequisites
 
 - Python 3.10 or later
-- Google GenAI Python SDK (for running the Python scripts)
+- Google GenAI Python SDK (for running the Python scripts) (This can be adapted for ChatGPT or any other LLM API model)
 - Verilog simulation tools (e.g., ModelSim, Xilinx Vivado)
+- Yosys suite
+- freePDK 45 nm or any other open-source PDK
 - Git
 
 ---
