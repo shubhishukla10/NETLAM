@@ -1,10 +1,8 @@
 import subprocess
 import google.generativeai as genai
 
-# Set your API key
-GOOGLE_API_KEY = 'AIzaSyAwv6XF9UfM_UcncaIhis9_D2I6XiHv4nI'
+GOOGLE_API_KEY = 'XXXXXXXXXXX'
 
-# Configure the API
 genai.configure(api_key=GOOGLE_API_KEY)
 
 model = genai.GenerativeModel(model_name='gemini-1.5-flash')
@@ -53,7 +51,7 @@ def compare_verilog_files_with_yosys(file1_path, file2_path, liberty_file, resul
 
         # Prepare the prompt for functional equivalence check
         prompt = f"""
-        1. Provide a detailed analysis of their functional behavior and determine if they are equivalent at the RTL-level, despite having varying top modules or additional sub-modules. Focus on input-output behavior and logical equivalence, ignoring optimizations or naming differences or gate implementations or additional Verilog modules. Is there any additional circuitry or malicious alteration in any of the two files?
+        1. Construct a miter circuit to check the functional equivalence of the two provided gate-level netlists. Provide a detailed analysis of their functional behavior and determine if they are equivalent at the RTL-level, despite having varying top modules or additional sub-modules. Focus on input-output behavior and logical equivalence, ignoring optimizations or naming differences or gate implementations or additional Verilog modules. Is there any additional circuitry or malicious alteration in any of the two files?
 
 	2. If a Trojan is detected in either netlist, analyze its characteristics and impact on the design. Start by identifying the Trojan type, such as key-dependent, payload-triggered, or side-channel-based, through structural and behavioral analysis of the netlist. Next, assess how the Trojan affects the overall design, focusing on vulnerabilities introduced, disruptions caused to timing or functionality, and potential security implications. Provide a thorough explanation of the Trojan’s behavior and its operational consequences.
 
