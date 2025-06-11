@@ -1,0 +1,121 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2020  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.33 (git sha1 2584903a060)
+
+
+-- Executing script file `equiv_check.ys' --
+
+1. Executing Verilog-2005 frontend: DAC_2025/AES-T1000/mapped_netlist_free.v
+Parsing Verilog input from `DAC_2025/AES-T1000/mapped_netlist_free.v' to AST representation.
+Generating RTLIL representation for module `\S'.
+Generating RTLIL representation for module `\S4'.
+Generating RTLIL representation for module `\T'.
+Generating RTLIL representation for module `\aes_128'.
+Generating RTLIL representation for module `\expand_key_128'.
+Generating RTLIL representation for module `\final_round'.
+Generating RTLIL representation for module `\one_round'.
+Generating RTLIL representation for module `\table_lookup'.
+Generating RTLIL representation for module `\top'.
+Generating RTLIL representation for module `\xS'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+
+2.2. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+Removed 0 unused modules.
+Renaming module top to gold.
+
+3. Executing Verilog-2005 frontend: DAC_2025/AES-T1000/mapped_netlist_in.v
+Parsing Verilog input from `DAC_2025/AES-T1000/mapped_netlist_in.v' to AST representation.
+Generating RTLIL representation for module `\S'.
+Generating RTLIL representation for module `\S4'.
+Generating RTLIL representation for module `\T'.
+Generating RTLIL representation for module `\TSC'.
+Generating RTLIL representation for module `\Trojan_Trigger'.
+Generating RTLIL representation for module `\aes_128'.
+Generating RTLIL representation for module `\expand_key_128'.
+Generating RTLIL representation for module `\final_round'.
+Generating RTLIL representation for module `\lfsr_counter'.
+Generating RTLIL representation for module `\one_round'.
+Generating RTLIL representation for module `\table_lookup'.
+Generating RTLIL representation for module `\top'.
+Generating RTLIL representation for module `\xS'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \TSC
+Used module:         \lfsr_counter
+Used module:     \Trojan_Trigger
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+
+4.2. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \TSC
+Used module:         \lfsr_counter
+Used module:     \Trojan_Trigger
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+Removed 0 unused modules.
+Renaming module top to gate.
+
+5. Executing EQUIV_MAKE pass (creating equiv checking module).
+ERROR: Can't match gate port `Capacitance_gate' to a gold port.

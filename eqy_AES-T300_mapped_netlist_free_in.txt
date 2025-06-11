@@ -1,0 +1,425 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2020  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.33 (git sha1 2584903a060)
+
+
+-- Executing script file `equiv_check.ys' --
+
+1. Executing Verilog-2005 frontend: DAC_2025/AES-T300/mapped_netlist_free.v
+Parsing Verilog input from `DAC_2025/AES-T300/mapped_netlist_free.v' to AST representation.
+Generating RTLIL representation for module `\S'.
+Generating RTLIL representation for module `\S4'.
+Generating RTLIL representation for module `\T'.
+Generating RTLIL representation for module `\aes_128'.
+Generating RTLIL representation for module `\expand_key_128'.
+Generating RTLIL representation for module `\final_round'.
+Generating RTLIL representation for module `\one_round'.
+Generating RTLIL representation for module `\table_lookup'.
+Generating RTLIL representation for module `\top'.
+Generating RTLIL representation for module `\xS'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+
+2.1. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+
+2.2. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+Removed 0 unused modules.
+Renaming module top to gold.
+
+3. Executing Verilog-2005 frontend: DAC_2025/AES-T300/mapped_netlist_in.v
+Parsing Verilog input from `DAC_2025/AES-T300/mapped_netlist_in.v' to AST representation.
+Generating RTLIL representation for module `\S'.
+Generating RTLIL representation for module `\S4'.
+Generating RTLIL representation for module `\T'.
+Generating RTLIL representation for module `\aes_128'.
+Generating RTLIL representation for module `\expand_key_128'.
+Generating RTLIL representation for module `\final_round'.
+Generating RTLIL representation for module `\one_round'.
+Generating RTLIL representation for module `\table_lookup'.
+Generating RTLIL representation for module `\top'.
+Generating RTLIL representation for module `\xS'.
+Successfully finished Verilog frontend.
+
+4. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+
+4.2. Analyzing design hierarchy..
+Top module:  \top
+Used module:     \aes_128
+Used module:         \final_round
+Used module:             \S4
+Used module:                 \S
+Used module:         \one_round
+Used module:             \table_lookup
+Used module:                 \T
+Used module:                     \xS
+Used module:         \expand_key_128
+Removed 0 unused modules.
+Renaming module top to gate.
+
+5. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: state_gold (\state_gold), state_gate (\state_gate) -> state
+Presumably equivalent wires: rst_gold (\rst_gold), rst_gate (\rst_gate) -> rst
+Presumably equivalent wires: out_gold (\out_gold), out_gate (\out_gate) -> out
+Presumably equivalent wires: key_gold (\key_gold), key_gate (\key_gate) -> key
+Presumably equivalent wires: clk_gold (\clk_gold), clk_gate (\clk_gate) -> clk
+Changing input out of cell AES_gate (aes_128): \out_gate -> \out
+Changing input out of cell AES_gold (aes_128): \out_gold -> \out
+Setting undriven nets to undef: \out_gold
+Setting undriven nets to undef: \out_gate
+
+6. Executing HIERARCHY pass (managing design hierarchy).
+
+6.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+6.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 2 unused modules.
+
+7. Executing FLATTEN pass (flatten design).
+
+8. Executing EQUIV_SIMPLE pass.
+Found 128 unproven $equiv cells (1 groups) in equiv:
+ Grouping SAT models for \out:
+  Trying to prove $equiv for \out [0]: success!
+  Trying to prove $equiv for \out [1]: success!
+  Trying to prove $equiv for \out [2]: success!
+  Trying to prove $equiv for \out [3]: success!
+  Trying to prove $equiv for \out [4]: success!
+  Trying to prove $equiv for \out [5]: success!
+  Trying to prove $equiv for \out [6]: success!
+  Trying to prove $equiv for \out [7]: success!
+  Trying to prove $equiv for \out [8]: success!
+  Trying to prove $equiv for \out [9]: success!
+  Trying to prove $equiv for \out [10]: success!
+  Trying to prove $equiv for \out [11]: success!
+  Trying to prove $equiv for \out [12]: success!
+  Trying to prove $equiv for \out [13]: success!
+  Trying to prove $equiv for \out [14]: success!
+  Trying to prove $equiv for \out [15]: success!
+  Trying to prove $equiv for \out [16]: success!
+  Trying to prove $equiv for \out [17]: success!
+  Trying to prove $equiv for \out [18]: success!
+  Trying to prove $equiv for \out [19]: success!
+  Trying to prove $equiv for \out [20]: success!
+  Trying to prove $equiv for \out [21]: success!
+  Trying to prove $equiv for \out [22]: success!
+  Trying to prove $equiv for \out [23]: success!
+  Trying to prove $equiv for \out [24]: success!
+  Trying to prove $equiv for \out [25]: success!
+  Trying to prove $equiv for \out [26]: success!
+  Trying to prove $equiv for \out [27]: success!
+  Trying to prove $equiv for \out [28]: success!
+  Trying to prove $equiv for \out [29]: success!
+  Trying to prove $equiv for \out [30]: success!
+  Trying to prove $equiv for \out [31]: success!
+  Trying to prove $equiv for \out [32]: success!
+  Trying to prove $equiv for \out [33]: success!
+  Trying to prove $equiv for \out [34]: success!
+  Trying to prove $equiv for \out [35]: success!
+  Trying to prove $equiv for \out [36]: success!
+  Trying to prove $equiv for \out [37]: success!
+  Trying to prove $equiv for \out [38]: success!
+  Trying to prove $equiv for \out [39]: success!
+  Trying to prove $equiv for \out [40]: success!
+  Trying to prove $equiv for \out [41]: success!
+  Trying to prove $equiv for \out [42]: success!
+  Trying to prove $equiv for \out [43]: success!
+  Trying to prove $equiv for \out [44]: success!
+  Trying to prove $equiv for \out [45]: success!
+  Trying to prove $equiv for \out [46]: success!
+  Trying to prove $equiv for \out [47]: success!
+  Trying to prove $equiv for \out [48]: success!
+  Trying to prove $equiv for \out [49]: success!
+  Trying to prove $equiv for \out [50]: success!
+  Trying to prove $equiv for \out [51]: success!
+  Trying to prove $equiv for \out [52]: success!
+  Trying to prove $equiv for \out [53]: success!
+  Trying to prove $equiv for \out [54]: success!
+  Trying to prove $equiv for \out [55]: success!
+  Trying to prove $equiv for \out [56]: success!
+  Trying to prove $equiv for \out [57]: success!
+  Trying to prove $equiv for \out [58]: success!
+  Trying to prove $equiv for \out [59]: success!
+  Trying to prove $equiv for \out [60]: success!
+  Trying to prove $equiv for \out [61]: success!
+  Trying to prove $equiv for \out [62]: success!
+  Trying to prove $equiv for \out [63]: success!
+  Trying to prove $equiv for \out [64]: success!
+  Trying to prove $equiv for \out [65]: success!
+  Trying to prove $equiv for \out [66]: success!
+  Trying to prove $equiv for \out [67]: success!
+  Trying to prove $equiv for \out [68]: success!
+  Trying to prove $equiv for \out [69]: success!
+  Trying to prove $equiv for \out [70]: success!
+  Trying to prove $equiv for \out [71]: success!
+  Trying to prove $equiv for \out [72]: success!
+  Trying to prove $equiv for \out [73]: success!
+  Trying to prove $equiv for \out [74]: success!
+  Trying to prove $equiv for \out [75]: success!
+  Trying to prove $equiv for \out [76]: success!
+  Trying to prove $equiv for \out [77]: success!
+  Trying to prove $equiv for \out [78]: success!
+  Trying to prove $equiv for \out [79]: success!
+  Trying to prove $equiv for \out [80]: success!
+  Trying to prove $equiv for \out [81]: success!
+  Trying to prove $equiv for \out [82]: success!
+  Trying to prove $equiv for \out [83]: success!
+  Trying to prove $equiv for \out [84]: success!
+  Trying to prove $equiv for \out [85]: success!
+  Trying to prove $equiv for \out [86]: success!
+  Trying to prove $equiv for \out [87]: success!
+  Trying to prove $equiv for \out [88]: success!
+  Trying to prove $equiv for \out [89]: success!
+  Trying to prove $equiv for \out [90]: success!
+  Trying to prove $equiv for \out [91]: success!
+  Trying to prove $equiv for \out [92]: success!
+  Trying to prove $equiv for \out [93]: success!
+  Trying to prove $equiv for \out [94]: success!
+  Trying to prove $equiv for \out [95]: success!
+  Trying to prove $equiv for \out [96]: success!
+  Trying to prove $equiv for \out [97]: success!
+  Trying to prove $equiv for \out [98]: success!
+  Trying to prove $equiv for \out [99]: success!
+  Trying to prove $equiv for \out [100]: success!
+  Trying to prove $equiv for \out [101]: success!
+  Trying to prove $equiv for \out [102]: success!
+  Trying to prove $equiv for \out [103]: success!
+  Trying to prove $equiv for \out [104]: success!
+  Trying to prove $equiv for \out [105]: success!
+  Trying to prove $equiv for \out [106]: success!
+  Trying to prove $equiv for \out [107]: success!
+  Trying to prove $equiv for \out [108]: success!
+  Trying to prove $equiv for \out [109]: success!
+  Trying to prove $equiv for \out [110]: success!
+  Trying to prove $equiv for \out [111]: success!
+  Trying to prove $equiv for \out [112]: success!
+  Trying to prove $equiv for \out [113]: success!
+  Trying to prove $equiv for \out [114]: success!
+  Trying to prove $equiv for \out [115]: success!
+  Trying to prove $equiv for \out [116]: success!
+  Trying to prove $equiv for \out [117]: success!
+  Trying to prove $equiv for \out [118]: success!
+  Trying to prove $equiv for \out [119]: success!
+  Trying to prove $equiv for \out [120]: success!
+  Trying to prove $equiv for \out [121]: success!
+  Trying to prove $equiv for \out [122]: success!
+  Trying to prove $equiv for \out [123]: success!
+  Trying to prove $equiv for \out [124]: success!
+  Trying to prove $equiv for \out [125]: success!
+  Trying to prove $equiv for \out [126]: success!
+  Trying to prove $equiv for \out [127]: success!
+Proved 128 previously unproven $equiv cells.
+
+9. Executing EQUIV_STRUCT pass.
+Running equiv_struct on module equiv:
+  Starting iteration 1.
+    Fwd merging 128 $equiv cells (from group of 128) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$128 and $auto$equiv_make.cc:257:find_same_wires$127.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$126 and $auto$equiv_make.cc:257:find_same_wires$125.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$124 and $auto$equiv_make.cc:257:find_same_wires$123.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$122 and $auto$equiv_make.cc:257:find_same_wires$121.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$120 and $auto$equiv_make.cc:257:find_same_wires$119.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$118 and $auto$equiv_make.cc:257:find_same_wires$117.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$116 and $auto$equiv_make.cc:257:find_same_wires$115.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$114 and $auto$equiv_make.cc:257:find_same_wires$113.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$112 and $auto$equiv_make.cc:257:find_same_wires$111.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$110 and $auto$equiv_make.cc:257:find_same_wires$109.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$108 and $auto$equiv_make.cc:257:find_same_wires$107.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$106 and $auto$equiv_make.cc:257:find_same_wires$105.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$104 and $auto$equiv_make.cc:257:find_same_wires$103.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$102 and $auto$equiv_make.cc:257:find_same_wires$101.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$100 and $auto$equiv_make.cc:257:find_same_wires$99.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$98 and $auto$equiv_make.cc:257:find_same_wires$97.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$96 and $auto$equiv_make.cc:257:find_same_wires$95.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$94 and $auto$equiv_make.cc:257:find_same_wires$93.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$92 and $auto$equiv_make.cc:257:find_same_wires$91.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$90 and $auto$equiv_make.cc:257:find_same_wires$89.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$88 and $auto$equiv_make.cc:257:find_same_wires$87.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$86 and $auto$equiv_make.cc:257:find_same_wires$85.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$84 and $auto$equiv_make.cc:257:find_same_wires$83.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$82 and $auto$equiv_make.cc:257:find_same_wires$81.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$80 and $auto$equiv_make.cc:257:find_same_wires$79.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$78 and $auto$equiv_make.cc:257:find_same_wires$77.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$76 and $auto$equiv_make.cc:257:find_same_wires$75.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$74 and $auto$equiv_make.cc:257:find_same_wires$73.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$72 and $auto$equiv_make.cc:257:find_same_wires$71.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$70 and $auto$equiv_make.cc:257:find_same_wires$69.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$68 and $auto$equiv_make.cc:257:find_same_wires$67.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$66 and $auto$equiv_make.cc:257:find_same_wires$65.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$64 and $auto$equiv_make.cc:257:find_same_wires$63.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$62 and $auto$equiv_make.cc:257:find_same_wires$61.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$60 and $auto$equiv_make.cc:257:find_same_wires$59.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$58 and $auto$equiv_make.cc:257:find_same_wires$57.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$56 and $auto$equiv_make.cc:257:find_same_wires$55.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$54 and $auto$equiv_make.cc:257:find_same_wires$53.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$52 and $auto$equiv_make.cc:257:find_same_wires$51.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$50 and $auto$equiv_make.cc:257:find_same_wires$49.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$48 and $auto$equiv_make.cc:257:find_same_wires$47.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$46 and $auto$equiv_make.cc:257:find_same_wires$45.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$44 and $auto$equiv_make.cc:257:find_same_wires$43.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$42 and $auto$equiv_make.cc:257:find_same_wires$41.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$40 and $auto$equiv_make.cc:257:find_same_wires$39.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$38 and $auto$equiv_make.cc:257:find_same_wires$37.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$36 and $auto$equiv_make.cc:257:find_same_wires$35.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$34 and $auto$equiv_make.cc:257:find_same_wires$33.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$32 and $auto$equiv_make.cc:257:find_same_wires$31.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$30 and $auto$equiv_make.cc:257:find_same_wires$29.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$28 and $auto$equiv_make.cc:257:find_same_wires$27.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$26 and $auto$equiv_make.cc:257:find_same_wires$25.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$24 and $auto$equiv_make.cc:257:find_same_wires$23.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$22 and $auto$equiv_make.cc:257:find_same_wires$21.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$20 and $auto$equiv_make.cc:257:find_same_wires$19.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$18 and $auto$equiv_make.cc:257:find_same_wires$17.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$16 and $auto$equiv_make.cc:257:find_same_wires$15.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$14 and $auto$equiv_make.cc:257:find_same_wires$13.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$12 and $auto$equiv_make.cc:257:find_same_wires$11.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$10 and $auto$equiv_make.cc:257:find_same_wires$9.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$8 and $auto$equiv_make.cc:257:find_same_wires$7.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$6 and $auto$equiv_make.cc:257:find_same_wires$5.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$3.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$1.
+  Starting iteration 2.
+    Fwd merging 64 $equiv cells (from group of 64) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$64 and $auto$equiv_make.cc:257:find_same_wires$96.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$62 and $auto$equiv_make.cc:257:find_same_wires$112.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$60 and $auto$equiv_make.cc:257:find_same_wires$94.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$58 and $auto$equiv_make.cc:257:find_same_wires$120.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$56 and $auto$equiv_make.cc:257:find_same_wires$92.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$54 and $auto$equiv_make.cc:257:find_same_wires$110.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$52 and $auto$equiv_make.cc:257:find_same_wires$90.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$50 and $auto$equiv_make.cc:257:find_same_wires$124.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$48 and $auto$equiv_make.cc:257:find_same_wires$88.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$46 and $auto$equiv_make.cc:257:find_same_wires$108.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$44 and $auto$equiv_make.cc:257:find_same_wires$86.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$42 and $auto$equiv_make.cc:257:find_same_wires$118.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$40 and $auto$equiv_make.cc:257:find_same_wires$84.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$38 and $auto$equiv_make.cc:257:find_same_wires$106.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$36 and $auto$equiv_make.cc:257:find_same_wires$82.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$34 and $auto$equiv_make.cc:257:find_same_wires$126.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$32 and $auto$equiv_make.cc:257:find_same_wires$80.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$30 and $auto$equiv_make.cc:257:find_same_wires$104.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$28 and $auto$equiv_make.cc:257:find_same_wires$78.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$26 and $auto$equiv_make.cc:257:find_same_wires$116.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$24 and $auto$equiv_make.cc:257:find_same_wires$76.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$22 and $auto$equiv_make.cc:257:find_same_wires$102.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$20 and $auto$equiv_make.cc:257:find_same_wires$74.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$18 and $auto$equiv_make.cc:257:find_same_wires$122.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$16 and $auto$equiv_make.cc:257:find_same_wires$72.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$14 and $auto$equiv_make.cc:257:find_same_wires$100.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$12 and $auto$equiv_make.cc:257:find_same_wires$70.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$10 and $auto$equiv_make.cc:257:find_same_wires$114.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$8 and $auto$equiv_make.cc:257:find_same_wires$68.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$6 and $auto$equiv_make.cc:257:find_same_wires$98.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$66.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$128.
+  Starting iteration 3.
+    Fwd merging 32 $equiv cells (from group of 32) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$32 and $auto$equiv_make.cc:257:find_same_wires$48.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$30 and $auto$equiv_make.cc:257:find_same_wires$56.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$28 and $auto$equiv_make.cc:257:find_same_wires$46.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$26 and $auto$equiv_make.cc:257:find_same_wires$60.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$24 and $auto$equiv_make.cc:257:find_same_wires$44.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$22 and $auto$equiv_make.cc:257:find_same_wires$54.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$20 and $auto$equiv_make.cc:257:find_same_wires$42.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$18 and $auto$equiv_make.cc:257:find_same_wires$62.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$16 and $auto$equiv_make.cc:257:find_same_wires$40.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$14 and $auto$equiv_make.cc:257:find_same_wires$52.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$12 and $auto$equiv_make.cc:257:find_same_wires$38.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$10 and $auto$equiv_make.cc:257:find_same_wires$58.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$8 and $auto$equiv_make.cc:257:find_same_wires$36.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$6 and $auto$equiv_make.cc:257:find_same_wires$50.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$34.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$64.
+  Starting iteration 4.
+    Fwd merging 16 $equiv cells (from group of 16) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$16 and $auto$equiv_make.cc:257:find_same_wires$24.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$14 and $auto$equiv_make.cc:257:find_same_wires$28.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$12 and $auto$equiv_make.cc:257:find_same_wires$22.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$10 and $auto$equiv_make.cc:257:find_same_wires$30.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$8 and $auto$equiv_make.cc:257:find_same_wires$20.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$6 and $auto$equiv_make.cc:257:find_same_wires$26.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$18.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$32.
+  Starting iteration 5.
+    Fwd merging 8 $equiv cells (from group of 8) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$8 and $auto$equiv_make.cc:257:find_same_wires$12.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$6 and $auto$equiv_make.cc:257:find_same_wires$14.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$10.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$16.
+  Starting iteration 6.
+    Fwd merging 4 $equiv cells (from group of 4) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$4 and $auto$equiv_make.cc:257:find_same_wires$6.
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$8.
+  Starting iteration 7.
+    Fwd merging 2 $equiv cells (from group of 2) using strategy deduplicate:
+      Merging cells $auto$equiv_make.cc:257:find_same_wires$2 and $auto$equiv_make.cc:257:find_same_wires$4.
+  Starting iteration 8.
+    Nothing to merge.
+  Performed a total of 127 merges in module equiv.
+
+10. Executing EQUIV_SIMPLE pass.
+Proved 0 previously unproven $equiv cells.
+
+11. Executing EQUIV_STATUS pass.
+Found 1 $equiv cells in equiv:
+  Of those cells 1 are proven and 0 are unproven.
+  Equivalence successfully proven!
+
+End of script. Logfile hash: 022ade5277, CPU: user 0.58s system 0.04s, MEM: 73.39 MB peak
+Yosys 0.33 (git sha1 2584903a060)
+Time spent: 90% 4x read_verilog (0 sec), 6% 4x design (0 sec), ...
