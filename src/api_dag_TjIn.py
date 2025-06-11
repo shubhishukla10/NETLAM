@@ -1,10 +1,8 @@
 import subprocess
 import google.generativeai as genai
 
-# Set your API key
-GOOGLE_API_KEY = 'AIzaSyAwv6XF9UfM_UcncaIhis9_D2I6XiHv4nI'
+GOOGLE_API_KEY = 'XXXXXXXXXXXX'
 
-# Configure the API
 genai.configure(api_key=GOOGLE_API_KEY)
 
 model = genai.GenerativeModel(model_name='gemini-1.5-flash')
