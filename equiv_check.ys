@@ -1,0 +1,26 @@
+# Read the trusted (golden) design
+read_verilog DAC_2025/AES-T900/mapped_netlist_free.v
+hierarchy -auto-top
+rename -top gold
+design -stash gold
+
+# Read the potentially compromised (gate) design
+read_verilog DAC_2025/AES-T900/mapped_netlist_free.v
+hierarchy -auto-top
+rename -top gate
+design -stash gate
+
+# Load both designs
+design -copy-from gold -as gold gold
+design -copy-from gate -as gate gate
+
+# Create equivalence checking miter
+equiv_make gold gate equiv
+hierarchy -top equiv
+flatten
+
+# Perform equivalence checking
+equiv_simple
+equiv_struct -icells
+equiv_simple
+equiv_status
